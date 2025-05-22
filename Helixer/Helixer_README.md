@@ -1,6 +1,8 @@
 # Helixer Setup and Usage on Atlas
 
-This guide explains how to set up and run **Helixer** for gene annotation on GPUs on the SCINet Atlas HPC cluster. The Helixer workflow is based on the tutorial at https://rcac-bioinformatics.readthedocs.io/en/latest/helixer.html. For more information abot Helixer see https://github.com/weberlab-hhu/Helixer.
+This guide explains how to set up and run **Helixer** for gene annotation on GPUs on the SCINet Atlas HPC cluster. 
+
+The Helixer workflow is based on the tutorial at https://rcac-bioinformatics.readthedocs.io/en/latest/helixer.html. For more information abot Helixer see https://github.com/weberlab-hhu/Helixer.
 
 ---
 
