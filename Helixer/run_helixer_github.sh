@@ -16,8 +16,13 @@ date
 
 module load apptainer
 module load miniconda3
+
+# set the directory where your helixer environment is located
+export PROJECTDIR=/your/project/directory/path 
+# activate environment
 source activate $PROJECTDIR/helixer_gpu_env 
 
+# set directories needed for Helixer Apptainer run
 export TMPDIR=$PROJECTDIR/apptainer
 export APPTAINER_CACHEDIR=$TMPDIR
 export APPTAINER_TMPDIR=$TMPDIR
