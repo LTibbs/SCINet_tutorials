@@ -1,8 +1,9 @@
 # DeepLoc2.1 Setup and Usage on Atlas
 
-This guide explains how to set up and run the program **DepLoc 2.1** to predict subcellular localization and membrane association of eukaryotic proteins on the SCINet Ceres HPC cluster. 
+This guide explains how to set up and run the program **DepLoc 2.1** to predict subcellular localization and membrane association of eukaryotic proteins on the SCINet Atlas HPC cluster. 
 
 For more information about DeepLoc see https://services.healthtech.dtu.dk/services/DeepLoc-2.1/, where a webserver allows prediction of up to 500 proteins at a time. To predict a full proteome on a server or personal machine, an academic download of DeepLoc 2.1 is available from https://services.healthtech.dtu.dk/cgi-bin/sw_request?software=deeploc&version=2.1&packageversion=2.1&platform=All.
+
 ---
 
 ## Sequence preparation
@@ -34,5 +35,45 @@ samtools faidx B73.faa
 ```
 
 ## DeepLoc setup
-Enter your information and request to download DeepLoc 2.1 from https://services.healthtech.dtu.dk/cgi-bin/sw_request?software=deeploc&version=2.1&packageversion=2.1&platform=All.
+Enter your information and request to download DeepLoc 2.1 from https://services.healthtech.dtu.dk/cgi-bin/sw_request?software=deeploc&version=2.1&packageversion=2.1&platform=All. This will give you a download called deeploc-2.1.All.tar.gz.
+
+```bash
+# set working directory (usually 90daydata, for shorter-term storage) and project directory (project, for longer storage)
+export WORKDIR=/your/working/directory/path        # e.g., /90daydata/user/deeploc
+export PROJECTDIR=/your/project/directory/path     # e.g., /project/labname/user
+
+# load modules and create conda environment
+# using the deeploc2.1_atlas.yml file
+module load miniconda3
+conda env create -f deeploc2.1_atlas.yml -p ${PROJECTDIR}/deeploc2.1
+source activate ${PROJECTDIR}/deeploc2.1
+cd ${PROJECTDIR}/deeploc2.1
+# upload the deeploc-2.1.All.tar.gz that you downloaded to ${PROJECTDIR}/deeploc2.1
+which pip # check that this is the conda version of pip to ensure correct installation
+python -m pip install deeploc-2.1.All.tar.gz # use to install deeploc
+
+# first run: DeepLoc will be installing the models, so need to make sure they're installed in the right place:
+mkdir ${PROJECTDIR}/torch_cache
+mkdir ${PROJECTDIR}/huggingface_cache
+export TORCH_HOME=${PROJECTDIR}/torch_cache
+export HF_HOME=${PROJECTDIR}/huggingface_cache
+
+# quick test: extract the test.fasta file from the deeploc-2.1.All.tar.gz download and use it to run a test
+# these test runs will also download the Fast and Accurate models automatically
+# -f: provide the input fasta file name; -o: provide the output folder name; -m: provide the model (Fast or Accurate)
+deeploc2 -f test.fasta -o test.fast -m Fast # compare output with results_testfast.csv 
+deeploc2 -f test.fasta -o test.accurate -m Accurate # compare output with results_testaccurate.csv 
+```
+
+## Run DeepLoc
+Use the `run_deeploc_atlas.sh` file to submit slurm jobs to run DeepLoc on full proteomes. Running `B73.short` with the `Fast` model takes about 13 hours and 13GB. Running `B73.long` with the `Accurate` model takes about 6 hours and 15GB.
+
+```bash
+# for the B73 example: run this in the same directory with `B73.short.fa` and `B73.long.fa`
+# NOTE: need to edit run_deeploc_atlas.sh based on your directory structure
+# first argument: input file base name (no .fa), which will also be the name of the output folder
+# second argument: desired model (Fast for short sequences or Accurate for long sequences)
+sbatch run_deeploc_atlas.sh B73.short Fast
+sbatch run_deeploc_atlas.sh B73.long Accurate 
+```
 
