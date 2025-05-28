@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -A $ACCOUNT  # Account name for the job
+#SBATCH -A ${ACCOUNT}  # Account name for the job
 #SBATCH --partition=atlas  # Partition to submit the job
 #SBATCH --job-name="deeploc"   #name of this job
 #SBATCH --mem=20GB              # memory requested
@@ -7,7 +7,7 @@
 #SBATCH --nodes=1               # number of nodes requested
 #SBATCH -t 24:00:00           # time allocated for this job hours:mins:seconds
 #SBATCH -o log/%j_deeploc    # standard output, %j adds job number to output file name and %N adds the node name
-#SBATCH --mail-user=$EMAIL  # email address to send updates
+#SBATCH --mail-user=${EMAIL}  # email address to send updates
 #SBATCH --mail-type=BEGIN
 #SBATCH --mail-type=END
 #SBATCH --mail-type=FAIL
@@ -27,7 +27,8 @@ source activate ${PROJECTDIR}/deeploc2.1
 infile=$1
 model=$2 
 
-mkdir ${WORKDIR}/${infile}/
+# make working directory and move to it
+mkdir -p ${WORKDIR}/${infile}/
 cd ${WORKDIR}/${infile}/
 
 # run deeploc
