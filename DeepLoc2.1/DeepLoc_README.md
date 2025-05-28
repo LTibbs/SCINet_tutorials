@@ -1,6 +1,6 @@
 # DeepLoc2.1 Setup and Usage on Atlas
 
-This guide explains how to set up and run the program **DepLoc 2.1** to predict subcellular localization and membrane association of eukaryotic proteins on the SCINet Atlas HPC cluster. 
+This guide explains how to set up and run the program **DeepLoc 2.1** to predict subcellular localization and membrane association of eukaryotic proteins on the SCINet Atlas HPC cluster. 
 
 For more information about DeepLoc see https://services.healthtech.dtu.dk/services/DeepLoc-2.1/, where a webserver allows prediction of up to 500 proteins at a time. To predict a full proteome on a server or personal machine, an academic download of DeepLoc 2.1 is available from https://services.healthtech.dtu.dk/cgi-bin/sw_request?software=deeploc&version=2.1&packageversion=2.1&platform=All.
 
@@ -16,22 +16,24 @@ module load seqkit
 # download genome, unzip, and rename it
 wget https://download.maizegdb.org/Genomes/B73/Zm-B73-REFERENCE-NAM-5.0/Zm-B73-REFERENCE-NAM-5.0_Zm00001eb.1.protein.fa.gz
 gunzip Zm-B73-REFERENCE-NAM-5.0_Zm00001eb.1.protein.fa.gz
-mv Zm-B73-REFERENCE-NAM-5.0_Zm00001eb.1.protein.fa B73.faa
+mv Zm-B73-REFERENCE-NAM-5.0_Zm00001eb.1.protein.fa B73.fa
 
-# use faidx to calculate sequence length (output fai file includes sequence length in column 2)
-samtools faidx B73.faa
+# use faidx to calculate sequence length (the output .fai file includes sequence length in column 2)
+samtools faidx B73.fa
 
 # make input files for the short and long models
 # Print the minimum length (column 2)
-  awk '{print $2}' "B73.faa.fai" | sort -n | head -n 1
+# this will show you if any sequences are less than 10 residues and therefore cannot be analyzed by DeepLoc
+  awk '{print $2}' "B73.fa.fai" | sort -n | head -n 1
 
   # Extract long sequences (>1022)
-  awk '$2 > 1022 {print $1}' "B73.faa.fai" > "$B73.long.seqs"
-  samtools faidx "B73.faa" -r "B73.long.seqs" > "B73.long.faa"
+  awk '$2 > 1022 {print $1}' B73.fa.fai > B73.long.seqs
+  samtools faidx B73.fa -r B73.long.seqs > B73.long.fa
+
 
   # Extract short sequences (10 < len ≤ 1022)
-  awk '$2 > 9 && $2 <= 1022 {print $1}' "B73.faa.fai" > "B73.short.seqs"
-  samtools faidx "B73.faa" -r "B73.short.seqs" > "B73.short.faa"
+  awk '$2 > 9 && $2 <= 1022 {print $1}' B73.fa.fai > B73.short.seqs
+  samtools faidx "B73.fa" -r B73.short.seqs > B73.short.fa
 ```
 
 ## DeepLoc setup
@@ -48,7 +50,8 @@ module load miniconda3
 conda env create -f deeploc2.1_atlas.yml -p ${PROJECTDIR}/deeploc2.1
 source activate ${PROJECTDIR}/deeploc2.1
 cd ${PROJECTDIR}/deeploc2.1
-# upload the deeploc-2.1.All.tar.gz that you downloaded to ${PROJECTDIR}/deeploc2.1
+
+# Now, make sure the deeploc-2.1.All.tar.gz that you downloaded is uploaded to ${PROJECTDIR}/deeploc2.1
 which pip # check that this is the conda version of pip to ensure correct installation
 python -m pip install deeploc-2.1.All.tar.gz # use to install deeploc
 
@@ -70,7 +73,8 @@ Use the `run_deeploc_atlas.sh` file to submit slurm jobs to run DeepLoc on full 
 
 ```bash
 # for the B73 example: run this in the same directory with `B73.short.fa` and `B73.long.fa`
-# NOTE: need to edit run_deeploc_atlas.sh based on your directory structure
+# NOTE: need to edit run_deeploc_atlas.sh in lines 19-20 based on your directory structure
+# as well as your account and email information in lines 2 and 10
 # first argument: input file base name (no .fa), which will also be the name of the output folder
 # second argument: desired model (Fast for short sequences or Accurate for long sequences)
 sbatch run_deeploc_atlas.sh B73.short Fast
