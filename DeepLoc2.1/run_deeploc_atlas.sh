@@ -15,22 +15,23 @@
 
 date                          #optional, prints out timestamp at the start of the job in stdout file
 
+# set working directory (usually 90daydata, for shorter-term storage) and project directory (project, for longer storage)
+WORKDIR=/your/working/directory/path        # e.g., /90daydata/user/deeploc, where input files are found and outfiles will be placed
+PROJECTDIR=/your/project/directory/path     # e.g., /project/labname/user
+
 # load and activate conda environment
 module load miniconda3
-source activate /project/maizegdb/ltibbs/conda_envs/deeploc2.1
+source activate ${PROJECTDIR}/deeploc2.1
 
 # get arguments: input file (without the ".fa" ending), and model name
 infile=$1
 model=$2 
 
-# set your desired working directory, where input files are found and outfiles will be placed
-MYDIR=/your/input/directory/path # for example /90daydata/maizegdb/ltibbs/deeploc2.1/
-
-mkdir ${MYDIR}/${infile}/
-cd ${MYDIR}/${infile}/
+mkdir ${WORKDIR}/${infile}/
+cd ${WORKDIR}/${infile}/
 
 # run deeploc
 # model names (-m) are: Accurate or Fast
-deeploc2 -f ${MYDIR}/${infile}.fa -o ${MYDIR}/${infile} -m ${model}
+deeploc2 -f ${WORKDIR}/${infile}.fa -o ${WORKDIR}/${infile} -m ${model}
 
 #End of file
