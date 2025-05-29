@@ -69,7 +69,7 @@ deeploc2 -f test.fasta -o test.accurate -m Accurate # compare output with result
 ```
 
 ## Run DeepLoc
-Use the `run_deeploc_atlas.sh` file to submit slurm jobs to run DeepLoc on full proteomes. Running `B73.short` with the `Fast` model takes about 13 hours and 13GB. Running `B73.long` with the `Accurate` model takes about 6 hours and 15GB.
+Use the `run_deeploc_atlas.sh` file to submit slurm jobs to run DeepLoc on full proteomes. Running `B73.short` with the `Fast` model takes about 13 hours and 13GB. Running `B73.long` with the `Accurate` model takes about 13 hours and 15GB.
 
 ```bash
 # for the B73 example: run this in the same directory with `B73.short.fa` and `B73.long.fa`
