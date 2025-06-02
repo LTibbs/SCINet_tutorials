@@ -69,7 +69,7 @@ deeploc2 -f test.fasta -o test.accurate -m Accurate # compare output with result
 ```
 
 ## Run DeepLoc
-Use the `run_deeploc_atlas.sh` file to submit slurm jobs to run DeepLoc on full proteomes. Running `B73.short` with the `Fast` model takes about 13 hours and 13GB. Running `B73.long` with the `Accurate` model takes about 13 hours and 15GB.
+Use the `run_deeploc_atlas.sh` file to submit slurm jobs to run DeepLoc on full proteomes. Running `B73.short` with the `Fast` model takes about 37 hours and 13GB. Running `B73.long` with the `Accurate` model takes about 13 hours and 15GB.
 
 ```bash
 # for the B73 example: run this in the same directory with `B73.short.fa` and `B73.long.fa`
@@ -79,5 +79,40 @@ Use the `run_deeploc_atlas.sh` file to submit slurm jobs to run DeepLoc on full 
 # second argument: desired model (Fast for short sequences or Accurate for long sequences)
 sbatch run_deeploc_atlas.sh B73.short Fast
 sbatch run_deeploc_atlas.sh B73.long Accurate 
+```
+
+## Combine results of both models
+This takes results files stored in `prefix.long` and `prefix.short` subfolders and combines them into a single results `.csv ` file.
+```bash
+for prefix in $(find . -mindepth 1 -maxdepth 1 -type d -printf "%f\n" | cut -d. -f1 | sort -u); do
+output_file="${prefix}.results.csv"
+first=1
+reference_header=""
+
+for subdir in ${prefix}.*; do
+csv_file=$(find "$subdir" -maxdepth 1 -type f -name 'results_*.csv')
+
+if [[ -f "$csv_file" ]]; then
+current_header=$(head -n 1 "$csv_file")
+
+if [[ $first -eq 1 ]]; then
+reference_header="$current_header"
+cat "$csv_file" > "$output_file"
+first=0
+else
+  if [[ "$current_header" != "$reference_header" ]]; then
+echo "Header mismatch in $csv_file — skipping!" >&2
+continue
+fi
+tail -n +2 "$csv_file" >> "$output_file"
+fi
+else
+  echo "No results_*.csv in $subdir" >&2
+fi
+done
+
+echo "Written $output_file"
+done
+
 ```
 
