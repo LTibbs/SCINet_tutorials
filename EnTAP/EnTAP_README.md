@@ -151,7 +151,7 @@ To submit EnTAP run using SLURM script:
 ```bash
 sbatch run_EnTAP.sh
 ```
-
 For a single genome, EnTAP took about 3 hours and 64 GB of memory.
+
 ---
 
